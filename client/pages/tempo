@@ -1,0 +1,48 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useEffect, useState } from 'react'
+import React from 'react'
+import Link from 'next/link';
+
+export default function Articleovies({ }) {
+  const supabase = useSupabaseClient()
+  const [listemovies, setListmovies] = useState();
+
+  useEffect(() => {
+    async function fetchMovie() {
+      try {
+        const { data: MoviesData, error } = await supabase
+          .from('Movies')
+          .select('id, title, description')
+        if (error) {
+          throw error;
+        }
+        if (MoviesData) {
+          setListmovies(MoviesData);
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error.message);
+      }
+    }
+    fetchMovie();
+  }, [supabase]);
+
+  return (
+    <div className="form-widget grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {listemovies &&
+        listemovies.map((movie) => (
+          <div key={movie.id} className="border rounded-lg p-4 transition duration-300 hover:border-4 hover:border-gray-400">
+            <Link href={`/Movies/${movie.id}`}>
+              <div>
+                <p className="font-bold">Title:</p>
+                <p>{movie.title}</p>
+              </div>
+              <div className="mt-2">
+                <p className="font-bold">Description:</p>
+                <p>{movie.description}</p>
+              </div>
+            </Link>
+          </div>
+        ))}
+    </div>
+  );
+}
